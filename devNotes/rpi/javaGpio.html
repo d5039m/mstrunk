@@ -1,3 +1,22 @@
 <html>
-placehold for java gpio tutorial
+Make sure we're starting with a fresh install of Raspian that has is fully updated by running:
+sudo apt-get update
+sudo apt-get upgrade
+
+
+First we need to install a jdk as this project uses java!
+
+> sudo apt-get install openjdk-7-jdk
+
+run java -version to check that everything installed ok
+Example project uses teh following jars (which are also stored in the libs folder here)
+
+> wget https://github.com/downloads/savagehomeautomation/raspi-sspc/raspi-sspc-1.0.0.jar
+> wget https://github.com/downloads/Pi4J/pi4j/pi4j-core-0.0.3-SNAPSHOT.jar
+
+Run the following command to see if it works
+> sudo java -classpath classes:./'*' SSPC
+
+
+
 </html>
