@@ -19,14 +19,18 @@ public class GpioTest {
     GpioPinDigitalOutput red;
     GpioPinDigitalOutput green;
 
-    public GpioTest() {
-        init();
-
+    public static void main(String [] args) {
+	GpioTest test = new GpioTest();
+	test.init();
+        test.start();
+    }
+	
+    public void start(){
         while(true){
             green.toggle();
             System.out.println("Green toggle");
             red.toggle();
-            System.out.println("red toggle");
+            System.out.println("Red toggle");
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
