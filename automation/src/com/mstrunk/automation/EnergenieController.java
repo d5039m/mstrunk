@@ -109,43 +109,48 @@ public class EnergenieController {
                 d2.setState(PinState.HIGH);
                 d3.setState(PinState.HIGH);
                 sendSignalToSocket();
-                System.out.println("Scoket 1 State = ON");
+                System.out.println("Socket 1 State = ON");
             }else if(command.equalsIgnoreCase("one off")){
                 d0.setState(PinState.HIGH);
                 d1.setState(PinState.HIGH);
                 d2.setState(PinState.HIGH);
                 d3.setState(PinState.LOW);
                 sendSignalToSocket();
-                System.out.println("Scoket 1 State = OFF");
+                System.out.println("Socket 1 State = OFF");
             }else if(command.equalsIgnoreCase("two on")){
                 d0.setState(PinState.LOW);
                 d1.setState(PinState.HIGH);
                 d2.setState(PinState.HIGH);
                 d3.setState(PinState.HIGH);
                 sendSignalToSocket();
-                System.out.println("Scoket 2 State = ON");
+                System.out.println("Socket 2 State = ON");
             }else if(command.equalsIgnoreCase("two off")){
                 d0.setState(PinState.LOW);
                 d1.setState(PinState.HIGH);
                 d2.setState(PinState.HIGH);
                 d3.setState(PinState.LOW);
                 sendSignalToSocket();
-                System.out.println("Scoket 2 State = OFF");
+                System.out.println("Socket 2 State = OFF");
             }else if(command.equalsIgnoreCase("both on")){
                 d0.setState(PinState.HIGH);
                 d1.setState(PinState.HIGH);
                 d2.setState(PinState.LOW);
                 d3.setState(PinState.HIGH);
                 sendSignalToSocket();
-                System.out.println("Scoket 1 & 2 State = ON");
+                System.out.println("Socket 1 & 2 State = ON");
             }else if(command.equalsIgnoreCase("both off")){
                 d0.setState(PinState.HIGH);
                 d1.setState(PinState.HIGH);
                 d2.setState(PinState.LOW);
                 d3.setState(PinState.LOW);
                 sendSignalToSocket();
-                System.out.println("Scoket 1 & 2 State = OFF");
-            }else {
+                System.out.println("Socket 1 & 2 State = OFF");
+            }else if(command.equalsIgnoreCase("clear")){
+                d0.setState(PinState.LOW);
+                d1.setState(PinState.LOW);
+                d2.setState(PinState.LOW);
+                d3.setState(PinState.LOW);
+            } else {
                 System.out.println("COMMAND NOT RECOGNISED");
             }
         }
