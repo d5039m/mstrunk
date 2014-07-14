@@ -1,3 +1,4 @@
+package com.mstrunk.automation;
 import com.pi4j.io.gpio.*;
 
 /**
