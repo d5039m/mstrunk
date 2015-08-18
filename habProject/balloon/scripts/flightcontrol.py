@@ -15,11 +15,11 @@ altitude = ''
 logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
 logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
-gps_set_sucess = False
+gpsInNavMode = False
 
 print "-----------------------------------------------------"
 print "                HAB SOFTWARE V0.1                    "
-print "\n\n\n\n "
+print "\n\n\n "
 print "-----------------------------------------------------"
 print "initialising"
 print "Telemetry output ->  " + logName
@@ -54,9 +54,9 @@ def getUBX_ACK(MSG):
                 ackPacket[9] = ackPacket[9] + ackPacket[8]
 
         #print expected packet
-        print "Expected ACK Response: "
-        for byt in ackPacket:
-                print byt
+        #print "Expected ACK Response: "
+        #for byt in ackPacket:
+        #        print byt
                 
         print "Waiting for UBX ACK reply:"
         while 1:
@@ -80,6 +80,12 @@ def getUBX_ACK(MSG):
                         else:
                                 ackByteID = 0 #reset and look again, invalid order
 
+def initBoard():
+    global GPIO
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(18, GPIO.OUT)
+    GPIO.output(18, False)
+
 
 #Start camera process
 def initCamera():
@@ -90,7 +96,18 @@ def initCamera():
 
 #Read and process GPS data
 def initGPS():
-    global FIX
+    global FIX, gpsInNavMode
+    
+    #Set to airborne mode and wait for response
+    while not gpsInNavMode:
+        print "Sending UBX Command: "
+        setNav = bytearray.fromhex("B5 62 06 24 24 00 FF FF 06 03 00 00 00 00 10 27 00 00 05 00 FA 00 FA 00 64 00 2C 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 DC")
+        ser.write(setNav)
+        ser.write("\r\n")
+        print 'command sent'
+        gpsInNavMode = getUBX_ACK(setNav);
+    
+    #Wait for fix before continuing
     while not FIX:
         gpsLine = ser.readline()
         if gpsLine.startswith('$GNRMC'):
@@ -102,6 +119,7 @@ def initGPS():
                  GPIO.output(18, True)
                  print 'Acquired GPS FIX'
 
+#Extract data from GGA lines. These contain all the info we need for a basic fix
 def parseGPS(gpsLine):
     global fixTime,lattitude,longitude,altitude
     
@@ -115,19 +133,9 @@ def parseGPS(gpsLine):
         logfile.write(logline + '\n')
         print logline
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(18, GPIO.OUT)
-GPIO.output(18, False)
 
-while not gps_set_sucess:
-    print "Sending UBX Command: "
-    setNav = bytearray.fromhex("B5 62 06 24 24 00 FF FF 06 03 00 00 00 00 10 27 00 00 05 00 FA 00 FA 00 64 00 2C 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 DC")
-    ser.write(setNav)
-    ser.write("\r\n")
-    print 'command sent'
-    gps_set_sucess = getUBX_ACK(setNav);
-
-
+#Main program
+initBoard()
 initCamera()
 initGPS()
 
@@ -139,6 +147,6 @@ try:
 except KeyboardInterrupt:
     print 'Keyboard Interrupt'
  
-    
+#Ensure that all GPIO channels used are reset    
 finally:
     GPIO.cleanup()
