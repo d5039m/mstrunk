@@ -5,7 +5,7 @@ import logging
 
 def checkDirectories(): 
     #Check to see if a pictures directory exists for today
-    dirName = "images"+time.strftime("-%y-%m-%d")
+    dirName = "/var/hab/images/images"+time.strftime("-%y-%m-%d")
     dirExists = os.path.isdir(dirName)
     if dirExists == False:
         print("Directory doesn't exist so creating it now")
@@ -16,6 +16,6 @@ def cameraLoop():
     checkDirectories()
     camera = picamera.PiCamera()
     while True:   
-        camera.capture("images"+time.strftime("-%y-%m-%d")+"/image"+time.strftime("%H:%M:%S")+".jpg")
+        camera.capture("images/images"+time.strftime("-%y-%m-%d")+"/image"+time.strftime("%H:%M:%S")+".jpg")
         time.sleep(150)
 	

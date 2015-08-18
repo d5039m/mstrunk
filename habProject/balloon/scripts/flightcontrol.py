@@ -11,7 +11,7 @@ fixTime = ''
 lattitude = ''
 longitude = ''
 altitude = ''
-logName = 'balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
+logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
 logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
 

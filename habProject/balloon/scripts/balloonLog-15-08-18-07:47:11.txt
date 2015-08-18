@@ -1,2 +1,0 @@
-07:47:12$MATBAL,time:,lattitude:,longitude:,altitude:
-07:47:22$MATBAL,time:,lattitude:,longitude:,altitude:
