@@ -42,7 +42,7 @@ def initGPS():
              active = data[2]
              if active.startswith('A'):
                  FIX = True
-                 GPIO.output(23,True)
+                 GPIO.output(18, True)
                  print 'Acquired GPS FIX'
 
 def parseGPS(gpsLine):
@@ -58,13 +58,21 @@ def parseGPS(gpsLine):
         logfile.write(logline + '\n')
         print logline
 
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(18, GPIO.OUT)
+GPIO.output(18, False)
+
 initCamera()
 initGPS()
 
-GPIO.setup(23, GPIO.OUT)
-GPIO.output(23, False)
+try:
+    while True:
+        dataLine = ser.readline()
+        parseGPS(dataLine)
 
-while True:
-    dataLine = ser.readline()
-    parseGPS(dataLine)
+except KeyboardInterrupt:
+    print 'Keyboard Interrupt'
+ 
     
+finally:
+    GPIO.cleanup()
