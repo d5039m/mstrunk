@@ -16,6 +16,6 @@ def cameraLoop():
     checkDirectories()
     camera = picamera.PiCamera()
     while True:   
-        camera.capture("images/images"+time.strftime("-%y-%m-%d")+"/image"+time.strftime("%H:%M:%S")+".jpg")
+        camera.capture("/var/hab/images/images"+time.strftime("-%y-%m-%d")+"/image"+time.strftime("%H:%M:%S")+".jpg")
         time.sleep(150)
 	
