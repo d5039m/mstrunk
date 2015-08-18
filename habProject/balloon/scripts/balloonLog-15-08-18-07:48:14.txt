@@ -1,0 +1,6 @@
+07:48:14$MATBAL,time:,lattitude:,longitude:,altitude:
+07:48:24$MATBAL,time:,lattitude:,longitude:,altitude:
+07:48:34$MATBAL,time:074814.00,lattitude:5127.84809N,longitude:00016.55813W,altitude:21.7M
+07:48:44$MATBAL,time:074814.00,lattitude:5127.84809N,longitude:00016.55813W,altitude:21.7M
+07:48:54$MATBAL,time:074814.00,lattitude:5127.84809N,longitude:00016.55813W,altitude:21.7M
+07:49:04$MATBAL,time:074814.00,lattitude:5127.84809N,longitude:00016.55813W,altitude:21.7M

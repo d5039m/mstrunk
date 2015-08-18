@@ -1,0 +1,9 @@
+08:50:38$MATBAL,time:085038.00,lattitude:5127.84679N,longitude:00016.56031W,altitude:24.7M
+08:50:39$MATBAL,time:085039.00,lattitude:5127.84679N,longitude:00016.56033W,altitude:24.7M
+08:50:40$MATBAL,time:085040.00,lattitude:5127.84676N,longitude:00016.56030W,altitude:24.6M
+08:50:41$MATBAL,time:085041.00,lattitude:5127.84670N,longitude:00016.56029W,altitude:24.5M
+08:50:42$MATBAL,time:085042.00,lattitude:5127.84666N,longitude:00016.56029W,altitude:24.4M
+08:50:43$MATBAL,time:085043.00,lattitude:5127.84668N,longitude:00016.56031W,altitude:24.4M
+08:50:44$MATBAL,time:085044.00,lattitude:5127.84665N,longitude:00016.56035W,altitude:24.3M
+08:50:45$MATBAL,time:085045.00,lattitude:5127.84662N,longitude:00016.56037W,altitude:24.3M
+08:50:46$MATBAL,time:085046.00,lattitude:5127.84660N,longitude:00016.56042W,altitude:24.3M

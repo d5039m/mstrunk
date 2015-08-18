@@ -1,0 +1,10 @@
+19:03:48$MATBAL,time:,lattitude:,longitude:,altitude:
+19:03:58$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:08$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:18$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:28$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:38$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:48$MATBAL,time:,lattitude:,longitude:,altitude:
+19:04:58$MATBAL,time:,lattitude:,longitude:,altitude:
+19:05:08$MATBAL,time:190349.00,lattitude:5127.85343N,longitude:00016.55758W,altitude:28.9M
+19:05:18$MATBAL,time:190349.00,lattitude:5127.85343N,longitude:00016.55758W,altitude:28.9M
