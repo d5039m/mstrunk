@@ -90,7 +90,6 @@ def initBoard():
     GPIO.setup(18, GPIO.OUT)
     GPIO.output(18, False)
 
-
 #Start camera subprocess
 def initCamera():
     print 'Starting camera subprocess \n'
@@ -115,7 +114,7 @@ def initGPS():
         ser.write("\r\n")
         print 'UBX command sent'
         gpsInNavMode = getUBX_ACK(setNav);
-    
+
     #Wait for fix before continuing
     while not FIX:
         gpsLine = ser.readline()
@@ -127,11 +126,17 @@ def initGPS():
                  FIX = True
                  GPIO.output(18, True)
                  print 'Acquired GPS FIX'
+    
+    print 'Disabling non GGA NMEA sentences from UBLOX'
+    ser.write("$PUBX,40,GLL,0,0,0,0*5C\r\n")
+    ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
+    ser.write("$PUBX,40,RMC,0,0,0,0*47\r\n")
+    ser.write("$PUBX,40,GSV,0,0,0,0*59\r\n")
+    ser.write("$PUBX,40,VTG,0,0,0,0*5E\r\n")                 
 
 #Extract data from GGA lines. These contain all the info we need for a basic fix
 def parseGPS(gpsLine):
     global fixTime,lattitude,longitude,altitude
-    
     if gpsLine.startswith('$GNGGA'):
         data = gpsLine.split(',')
         fixTime = data[1]
