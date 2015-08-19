@@ -5,6 +5,7 @@ import time
 from multiprocessing import Process
 import camscript
 import RPi.GPIO as GPIO
+import crcmod
 
 CALLSIGN = 'MATBAL'
 FIX = False
@@ -17,12 +18,14 @@ logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
 gpsInNavMode = False
 
+crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
+transmitCounter = 1
+
 print "-----------------------------------------------------"
 print "                HAB SOFTWARE V0.1                    "
-print "\n\n\n "
-print "-----------------------------------------------------"
+print "-----------------------------------------------------\n"
 print "initialising"
-print "Telemetry output ->  " + logName
+print "Telemetry output ->  " + logName + "\n"
  
 def millis():
         return int(round(time.time() * 1000))
@@ -82,6 +85,7 @@ def getUBX_ACK(MSG):
 
 def initBoard():
     global GPIO
+    print 'Setting gpio pins \n'
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(18, GPIO.OUT)
     GPIO.output(18, False)
@@ -89,7 +93,7 @@ def initBoard():
 
 #Start camera subprocess
 def initCamera():
-    print 'Starting camera subprocess'
+    print 'Starting camera subprocess \n'
     p = Process(target=camscript.cameraLoop)
     p.start()
     p.join
@@ -105,11 +109,11 @@ def initGPS():
     
     #Set to airborne mode and wait for response
     while not gpsInNavMode:
-        print "Sending UBX Command: "
+        print "Sending UBX Navmode Command: "
         setNav = bytearray.fromhex("B5 62 06 24 24 00 FF FF 06 03 00 00 00 00 10 27 00 00 05 00 FA 00 FA 00 64 00 2C 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 DC")
         ser.write(setNav)
         ser.write("\r\n")
-        print 'command sent'
+        print 'UBX command sent'
         gpsInNavMode = getUBX_ACK(setNav);
     
     #Wait for fix before continuing
@@ -138,24 +142,35 @@ def parseGPS(gpsLine):
         logfile.write(logline + '\n')
         print logline
 
+def buildTelemetry():
+    string = str(CALLSIGN + ',' + fixTime + ',' + str(transmitCounter) + ',' +latitude + ',' + longitude + ',' + altitude) # the data string
+    csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
+    csum = csum.zfill(4) # creating the checksum data
+    telem = str("$$" + string + "*" + csum + "\n")
+    logfile.write(telem + '\n')
+    return telem
 
 #Main program
 initBoard()
 initCamera()
 initGPS()
-ser.close()
+#ser.close()
 try:
     i = 1
     while True:
         #Read 3 GPS lines for every radio transmission line
         if i % 5 == 0:
             print 'Fake Radio Transmission'
+            telemString = buildTelemetry()
+            print telemString
+            transmitCounter++
             #transmitData()
         else:
-            gps = serial.Serial('/dev/ttyAMA0',9600)
-            dataLine = gps.readline()
+            #gps = serial.Serial('/dev/ttyAMA0',9600)
+            dataLine = ser.readline()
+            print 'GPSDATA:' + dataLine
             parseGPS(dataLine)
-            gps.close()
+            #gps.close()
         time.sleep(1)
         i++
 
