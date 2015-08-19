@@ -1,6 +1,14 @@
 def millis():
         return int(round(time.time() * 1000))
         
+def setUbloxNavMode(ser):
+        print "Sending UBX Command: "
+        setNav = bytearray.fromhex("B5 62 06 24 24 00 FF FF 06 03 00 00 00 00 10 27 00 00 05 00 FA 00 FA 00 64 00 2C 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 DC")
+        ser.write(setNav)
+        ser.write("\r\n")
+        print 'UBX command sent'
+
+
 def getUBX_ACK(ser, MSG):
         b = 0
         ackByteID = 0
