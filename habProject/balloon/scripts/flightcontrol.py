@@ -87,12 +87,17 @@ def initBoard():
     GPIO.output(18, False)
 
 
-#Start camera process
+#Start camera subprocess
 def initCamera():
     print 'Starting camera subprocess'
     p = Process(target=camscript.cameraLoop)
     p.start()
     p.join
+    
+ def transmitData(dataLine):
+     radio = serial.Serial('/dev/ttyAMA0',300, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_TWO)
+     radio.write(dataLine)
+     radio.close()
 
 #Read and process GPS data
 def initGPS():
@@ -138,11 +143,21 @@ def parseGPS(gpsLine):
 initBoard()
 initCamera()
 initGPS()
-
+ser.close()
 try:
+    i = 1
     while True:
-        dataLine = ser.readline()
-        parseGPS(dataLine)
+        #Read 3 GPS lines for every radio transmission line
+        if i % 5 == 0:
+            print 'Fake Radio Transmission'
+            #transmitData()
+        else:
+            gps = serial.Serial('/dev/ttyAMA0',9600)
+            dataLine = gps.readline()
+            parseGPS(dataLine)
+            gps.close()
+        time.sleep(1)
+        i++
 
 except KeyboardInterrupt:
     print 'Keyboard Interrupt'
