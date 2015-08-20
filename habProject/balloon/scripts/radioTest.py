@@ -10,7 +10,7 @@ try:
     while True:
         print("Sending Radio Beacon message")
         ser.write("RADIO BEACON TEST")
-	      time.sleep(1)
+	time.sleep(1)
         
 except KeyboardInterupt:
     print "Program shutdown from keyboard"
