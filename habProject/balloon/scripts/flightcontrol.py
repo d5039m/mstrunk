@@ -8,11 +8,12 @@ import RPi.GPIO as GPIO
 import crcmod
 
 CALLSIGN = 'MATBAL'
+gpsData = {'fixTime':'','lattitude':'','longitude':'','altitude':''}
 FIX = False
-fixTime = ''
-lattitude = ''
-longitude = ''
-altitude = ''
+#fixTime = ''
+#lattitude = ''
+#longitude = ''
+#altitude = ''
 logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
 logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
@@ -136,19 +137,22 @@ def initGPS():
 
 #Extract data from GGA lines. These contain all the info we need for a basic fix
 def parseGPS(gpsLine):
-    global fixTime,lattitude,longitude,altitude
     if gpsLine.startswith('$GNGGA'):
         data = gpsLine.split(',')
-        fixTime = data[1]
-        lattitude = data[2] + data[3]
-        longitude = data[4] + data[5]
-        altitude = data[9] + data[10]
-        logline = time.strftime("%H:%M:%S")+ '$'+CALLSIGN + ',time:'+fixTime+',lattitude:'+lattitude+',longitude:'+longitude+',altitude:'+altitude
+        gpsData['fixTime'] = data[1]
+        gpsData['lattitude'] = data[2] + data[3]
+        gpsData['longitude'] = data[4] + data[5]
+        gpsData['altitude'] = data[9] + data[10]
+        #fixTime = data[1]
+        #lattitude = data[2] + data[3]
+        #longitude = data[4] + data[5]
+        #altitude = data[9] + data[10]
+        logline = time.strftime("%H:%M:%S")+ '$'+CALLSIGN + ',time:'+gpsData['fixTime']+',lattitude:'+gpsData['lattitude']+',longitude:'+gpsData['longitude']+',altitude:'+gpsData['altitude']
         logfile.write(logline + '\n')
         print logline
 
 def buildTelemetry():
-    string = str(CALLSIGN + ',' + fixTime + ',' + str(transmitCounter) + ',' +latitude + ',' + longitude + ',' + altitude) # the data string
+    string = str(CALLSIGN + ',' + gpsData['fixTime'] + ',' + str(transmitCounter) + ',' +gpsData['lattitude'] + ',' + gpsData['longitude'] + ',' + gpsData['altitude']) # the data string
     csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
     csum = csum.zfill(4) # creating the checksum data
     telem = str("$$" + string + "*" + csum + "\n")
