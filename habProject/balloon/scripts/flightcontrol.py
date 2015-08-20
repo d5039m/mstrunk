@@ -5,7 +5,7 @@ import time
 from multiprocessing import Process
 import camscript
 import RPi.GPIO as GPIO
-import crcmod
+#import crcmod
 
 CALLSIGN = 'MATBAL'
 gpsData = {'fixTime':'','lattitude':'','longitude':'','altitude':''}
@@ -19,7 +19,7 @@ logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
 gpsInNavMode = False
 
-crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
+#crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
 transmitCounter = 1
 
 print "-----------------------------------------------------"
@@ -98,10 +98,10 @@ def initCamera():
     p.start()
     p.join
     
- def transmitData(dataLine):
-     radio = serial.Serial('/dev/ttyAMA0',300, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_TWO)
-     radio.write(dataLine)
-     radio.close()
+def transmitData(dataLine):
+    radio = serial.Serial('/dev/ttyAMA0',300, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_TWO)
+    radio.write(dataLine)
+    radio.close()
 
 #Read and process GPS data
 def initGPS():
@@ -130,7 +130,7 @@ def initGPS():
     
     print 'Disabling non GGA NMEA sentences from UBLOX'
     ser.write("$PUBX,40,GLL,0,0,0,0*5C\r\n")
-    ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
+    #ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
     ser.write("$PUBX,40,RMC,0,0,0,0*47\r\n")
     ser.write("$PUBX,40,GSV,0,0,0,0*59\r\n")
     ser.write("$PUBX,40,VTG,0,0,0,0*5E\r\n")                 
@@ -149,12 +149,13 @@ def parseGPS(gpsLine):
         #altitude = data[9] + data[10]
         logline = time.strftime("%H:%M:%S")+ '$'+CALLSIGN + ',time:'+gpsData['fixTime']+',lattitude:'+gpsData['lattitude']+',longitude:'+gpsData['longitude']+',altitude:'+gpsData['altitude']
         logfile.write(logline + '\n')
-        print logline
+        #print logline
 
 def buildTelemetry():
     string = str(CALLSIGN + ',' + gpsData['fixTime'] + ',' + str(transmitCounter) + ',' +gpsData['lattitude'] + ',' + gpsData['longitude'] + ',' + gpsData['altitude']) # the data string
-    csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
-    csum = csum.zfill(4) # creating the checksum data
+    #csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
+    #csum = csum.zfill(4) # creating the checksum data
+    csum = 'csum'
     telem = str("$$" + string + "*" + csum + "\n")
     logfile.write(telem + '\n')
     return telem
@@ -172,7 +173,7 @@ try:
             print 'Fake Radio Transmission'
             telemString = buildTelemetry()
             print telemString
-            transmitCounter++
+            transmitCounter += 1
             #transmitData()
         else:
             #gps = serial.Serial('/dev/ttyAMA0',9600)
@@ -181,7 +182,7 @@ try:
             parseGPS(dataLine)
             #gps.close()
         time.sleep(1)
-        i++
+        i += 1
 
 except KeyboardInterrupt:
     print 'Keyboard Interrupt'

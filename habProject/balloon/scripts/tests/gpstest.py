@@ -83,11 +83,11 @@ while not gpsInNavMode:
     gpsInNavMode = getUBX_ACK(setNav);
     
 print 'Disabling non GGA NMEA sentences from UBLOX'
-ser.write("$PUBX,40,GLL,0,0,0,0*5C\r\n")
-ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
-ser.write("$PUBX,40,RMC,0,0,0,0*47\r\n")
-ser.write("$PUBX,40,GSV,0,0,0,0*59\r\n")
-ser.write("$PUBX,40,VTG,0,0,0,0*5E\r\n")   
+ser.write("$PUBX,40,GLL,1,1,0,0*5C\r\n")
+ser.write("$PUBX,40,GSA,1,1,0,0*4E\r\n")
+ser.write("$PUBX,40,RMC,1,1,0,0*47\r\n")
+ser.write("$PUBX,40,GSV,1,1,0,0*59\r\n")
+ser.write("$PUBX,40,VTG,1,1,0,0*5E\r\n")   
 
 while True:
     gpsLine = ser.readline()
