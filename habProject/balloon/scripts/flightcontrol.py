@@ -100,12 +100,12 @@ def initCamera():
     
 def transmitData(dataLine):
     radio = serial.Serial('/dev/ttyAMA0',300, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_TWO)
-    radio.write(dataLine)
+    #radio.write(dataLine)
     radio.close()
 
 #Read and process GPS data
 def initGPS():
-    global FIX, gpsInNavMode
+    global gpsInNavMode
     
     #Set to airborne mode and wait for response
     while not gpsInNavMode:
@@ -115,38 +115,31 @@ def initGPS():
         ser.write("\r\n")
         print 'UBX command sent'
         gpsInNavMode = getUBX_ACK(setNav);
-
-    #Wait for fix before continuing
-    while not FIX:
-        gpsLine = ser.readline()
-        if gpsLine.startswith('$GNRMC'):
-             print gpsLine
-             data = gpsLine.split(',')
-             active = data[2]
-             if active.startswith('A'):
-                 FIX = True
-                 GPIO.output(18, True)
-                 print 'Acquired GPS FIX'
     
     print 'Disabling non GGA NMEA sentences from UBLOX'
     ser.write("$PUBX,40,GLL,0,0,0,0*5C\r\n")
-    #ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
+    ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
     ser.write("$PUBX,40,RMC,0,0,0,0*47\r\n")
     ser.write("$PUBX,40,GSV,0,0,0,0*59\r\n")
     ser.write("$PUBX,40,VTG,0,0,0,0*5E\r\n")                 
 
 #Extract data from GGA lines. These contain all the info we need for a basic fix
 def parseGPS(gpsLine):
+    global FIX
     if gpsLine.startswith('$GNGGA'):
         data = gpsLine.split(',')
         gpsData['fixTime'] = data[1]
         gpsData['lattitude'] = data[2] + data[3]
         gpsData['longitude'] = data[4] + data[5]
+        gpsData['numsats'] = data[7]
         gpsData['altitude'] = data[9] + data[10]
-        #fixTime = data[1]
-        #lattitude = data[2] + data[3]
-        #longitude = data[4] + data[5]
-        #altitude = data[9] + data[10]
+
+        if not FIX:
+            if int(gpsData['numsats']) > 3:
+                FIX = True
+                GPIO.output(18, True)
+                print 'Acquired GPS FIX'
+                  
         logline = time.strftime("%H:%M:%S")+ '$'+CALLSIGN + ',time:'+gpsData['fixTime']+',lattitude:'+gpsData['lattitude']+',longitude:'+gpsData['longitude']+',altitude:'+gpsData['altitude']
         logfile.write(logline + '\n')
         #print logline
@@ -164,25 +157,23 @@ def buildTelemetry():
 initBoard()
 initCamera()
 initGPS()
-#ser.close()
+ser.close()
 try:
     i = 1
     while True:
-        #Read 3 GPS lines for every radio transmission line
-        if i % 5 == 0:
-            print 'Fake Radio Transmission'
-            telemString = buildTelemetry()
-            print telemString
-            transmitCounter += 1
-            #transmitData()
-        else:
-            #gps = serial.Serial('/dev/ttyAMA0',9600)
-            dataLine = ser.readline()
-            print 'GPSDATA:' + dataLine
-            parseGPS(dataLine)
-            #gps.close()
-        time.sleep(1)
-        i += 1
+        gps = serial.Serial('/dev/ttyAMA0',9600) 
+        dataLine = gps.readline()
+        print 'GPSDATA:' + dataLine
+        parseGPS(dataLine)
+        gps.close()
+        #time.sleep(1)
+
+        telemString = buildTelemetry()
+        print 'Fake Radio Transmission ' + telemString
+        transmitCounter += 1
+        transmitData(' ')
+        print transmitCounter
+        
 
 except KeyboardInterrupt:
     print 'Keyboard Interrupt'
