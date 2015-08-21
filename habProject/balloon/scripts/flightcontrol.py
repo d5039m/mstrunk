@@ -39,7 +39,6 @@ def getUBX_ACK(MSG):
 
         print "Reading ACK response: "
 	logging.info("Reading ACK response: ")
-
         
         #construct the expected ACK packet
         ackPacket[0] = int('0xB5', 16) #header
@@ -90,7 +89,6 @@ def getUBX_ACK(MSG):
                                 ackByteID = 0 #reset and look again, invalid order
 
 def initBoard():
-    global GPIO
     print 'Setting gpio pins'
     logging.info('initialising gpio pins')
     GPIO.setmode(GPIO.BOARD)
@@ -180,7 +178,6 @@ try:
         transmitCounter += 1
         transmitData(' ')
         
-
 except KeyboardInterrupt:
     print 'Keyboard Interrupt'
  
