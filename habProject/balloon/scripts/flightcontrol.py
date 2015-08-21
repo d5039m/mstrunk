@@ -5,21 +5,17 @@ import time
 from multiprocessing import Process
 import camscript
 import RPi.GPIO as GPIO
-#import crcmod
+import crcmod
 
 CALLSIGN = 'MATBAL'
 gpsData = {'fixTime':'','lattitude':'','longitude':'','altitude':''}
 FIX = False
-#fixTime = ''
-#lattitude = ''
-#longitude = ''
-#altitude = ''
 logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
 logfile = open(logName,'w',1)
 ser = serial.Serial('/dev/ttyAMA0',9600)
 gpsInNavMode = False
 
-#crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
+crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
 transmitCounter = 1
 
 print "-----------------------------------------------------"
@@ -146,9 +142,8 @@ def parseGPS(gpsLine):
 
 def buildTelemetry():
     string = str(CALLSIGN + ',' + gpsData['fixTime'] + ',' + str(transmitCounter) + ',' +gpsData['lattitude'] + ',' + gpsData['longitude'] + ',' + gpsData['altitude']) # the data string
-    #csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
-    #csum = csum.zfill(4) # creating the checksum data
-    csum = 'csum'
+    csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
+    csum = csum.zfill(4) # creating the checksum data
     telem = str("$$" + string + "*" + csum + "\n")
     logfile.write(telem + '\n')
     return telem
