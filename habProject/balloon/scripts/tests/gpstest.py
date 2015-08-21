@@ -69,8 +69,8 @@ def getUBX_ACK(MSG):
 # MAIN PROGRAM
 ###############
 
-ser = serial.Serial('/dev/ttyAMA0',9600)
-
+#ser = serial.Serial('/dev/ttyAMA0',9600)
+ser = serial.Serial('/dev/ttyUSB0',9600)
 gpsInNavMode = False
 
 #Set to airborne mode and wait for response
