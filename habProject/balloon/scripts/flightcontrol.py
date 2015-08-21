@@ -6,13 +6,16 @@ from multiprocessing import Process
 import camscript
 import RPi.GPIO as GPIO
 import crcmod
+import logging
+
+logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
+logging.basicConfig(filename=logName ,format='%(asctime)s %(message)s',level=logging.DEBUG)
 
 CALLSIGN = 'MATBAL'
+
 gpsData = {'fixTime':'','lattitude':'','longitude':'','altitude':''}
 FIX = False
-logName = '/var/hab/logs/balloonLog'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt'
-logfile = open(logName,'w',1)
-ser = serial.Serial('/dev/ttyAMA0',9600)
+gpslog  = open('/var/hab/gps/gpsdata'+time.strftime("-%y-%m-%d-%H:%M:%S")+'.txt','w',1)
 gpsInNavMode = False
 
 crc16f = crcmod.predefined.mkCrcFun('crc-ccitt-false') # function for CRC-CCITT checksum
@@ -20,10 +23,10 @@ transmitCounter = 1
 
 print "-----------------------------------------------------"
 print "                HAB SOFTWARE V0.1                    "
-print "-----------------------------------------------------\n"
-print "initialising"
-print "Telemetry output ->  " + logName + "\n"
- 
+print "-----------------------------------------------------"
+print "initialising flight software"
+print "Telemetry output ->  " + logName
+logging.info("Initialising - CALLSIGN:" + CALLSIGN)
 def millis():
         return int(round(time.time() * 1000))
 
@@ -35,6 +38,8 @@ def getUBX_ACK(MSG):
         startTime = millis()
 
         print "Reading ACK response: "
+	logging.info("Reading ACK response: ")
+
         
         #construct the expected ACK packet
         ackPacket[0] = int('0xB5', 16) #header
@@ -59,16 +64,20 @@ def getUBX_ACK(MSG):
         #        print byt
                 
         print "Waiting for UBX ACK reply:"
+        logging.info("Waiting for UBX ACK reply:")
+ 
         while 1:
                 #test for success
                 if ackByteID > 9 :
                         #all packets are in order
                         print "(SUCCESS!)"
+			logging.info("(SUCCESS!)")
                         return True
 
                 #timeout if no valid response in 3 secs
                 if millis() - startTime > 3000:
                         print "(FAILED!)"
+			logging.warning('(FAILED!)')
                         return False
                 #make sure data is availible to read
                 if ser.inWaiting() > 0:
@@ -82,7 +91,8 @@ def getUBX_ACK(MSG):
 
 def initBoard():
     global GPIO
-    print 'Setting gpio pins \n'
+    print 'Setting gpio pins'
+    logging.info('initialising gpio pins')
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(18, GPIO.OUT)
     GPIO.output(18, False)
@@ -90,13 +100,14 @@ def initBoard():
 #Start camera subprocess
 def initCamera():
     print 'Starting camera subprocess \n'
+    logging.info('starting camera subprocess')
     p = Process(target=camscript.cameraLoop)
     p.start()
     p.join
     
 def transmitData(dataLine):
     radio = serial.Serial('/dev/ttyAMA0',300, serial.EIGHTBITS, serial.PARITY_NONE, serial.STOPBITS_TWO)
-    #radio.write(dataLine)
+    #radio.write(dataLine + "\n")
     radio.close()
 
 #Read and process GPS data
@@ -107,12 +118,15 @@ def initGPS():
     while not gpsInNavMode:
         print "Sending UBX Navmode Command: "
         setNav = bytearray.fromhex("B5 62 06 24 24 00 FF FF 06 03 00 00 00 00 10 27 00 00 05 00 FA 00 FA 00 64 00 2C 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 DC")
+        logging.info('Sending UBX Navmode command:'+ setNav)
         ser.write(setNav)
         ser.write("\r\n")
         print 'UBX command sent'
+        logging.info('UBX command send')
         gpsInNavMode = getUBX_ACK(setNav);
     
     print 'Disabling non GGA NMEA sentences from UBLOX'
+    logging.info('Disabling non GGA NMEA sentences')
     ser.write("$PUBX,40,GLL,0,0,0,0*5C\r\n")
     ser.write("$PUBX,40,GSA,0,0,0,0*4E\r\n")
     ser.write("$PUBX,40,RMC,0,0,0,0*47\r\n")
@@ -135,39 +149,36 @@ def parseGPS(gpsLine):
                 FIX = True
                 GPIO.output(18, True)
                 print 'Acquired GPS FIX'
-                  
-        logline = time.strftime("%H:%M:%S")+ '$'+CALLSIGN + ',time:'+gpsData['fixTime']+',lattitude:'+gpsData['lattitude']+',longitude:'+gpsData['longitude']+',altitude:'+gpsData['altitude']
-        logfile.write(logline + '\n')
-        #print logline
+                logging.info('Acquired GPS Fix')  
 
 def buildTelemetry():
     string = str(CALLSIGN + ',' + gpsData['fixTime'] + ',' + str(transmitCounter) + ',' +gpsData['lattitude'] + ',' + gpsData['longitude'] + ',' + gpsData['altitude']) # the data string
     csum = str(hex(crc16f(string))).upper()[2:] # running the CRC-CCITT checksum
     csum = csum.zfill(4) # creating the checksum data
-    telem = str("$$" + string + "*" + csum + "\n")
-    logfile.write(telem + '\n')
+    telem = str("$$" + string + "*" + csum)
+    logging.info(telem)
     return telem
 
 #Main program
+ser = serial.Serial('/dev/ttyAMA0',9600)
 initBoard()
 initCamera()
 initGPS()
 ser.close()
 try:
-    i = 1
     while True:
         gps = serial.Serial('/dev/ttyAMA0',9600) 
         dataLine = gps.readline()
-        print 'GPSDATA:' + dataLine
+        gpslog.write(dataLine)
+        print 'GPSDATA:' + dataLine.rstrip('\n')
         parseGPS(dataLine)
         gps.close()
-        #time.sleep(1)
 
         telemString = buildTelemetry()
+
         print 'Fake Radio Transmission ' + telemString
         transmitCounter += 1
         transmitData(' ')
-        print transmitCounter
         
 
 except KeyboardInterrupt:
