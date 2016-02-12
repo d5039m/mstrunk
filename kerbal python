@@ -1,0 +1,150 @@
+__author__ = 'ms71651'
+import math
+import turtle
+
+data = {
+               'Kerbol': {
+                        'name': "Kerbol",
+                        'mu': 1167922000,
+                        'radius': 65400,
+                        'color': "yellow"
+                },
+                'Moho': {
+                        'name': "Moho",
+                        'parent': "Kerbol",
+                        'alt': 5263138.3,
+                        'mu': 245.25,
+                        'radius': 250,
+                        'inclination': 7,
+                        'soi': 11206.449,
+                        'color': "brown"
+                },
+                'Kerbin': {
+                        'name': "Kerbin",
+                        'parent': "Kerbol",
+                        'alt': 13599840.256,
+                        'mu': 3531.6,
+                        'radius': 600,
+                        'inclination': 0,
+                        'soi': 84159.2865,
+                        'color': "skyblue"
+                },
+                'Mun': {
+                        'name': "Mun",
+                        'parent': "Kerbin",
+                        'alt': 12000,
+                        'mu': 65.138,
+                        'radius': 200,
+                        'inclination': 0,
+                        'soi': 2430,
+                        'color': "gray"
+                },
+                'Minmus': {
+                        'name': "Minmus",
+                        'parent': "Kerbin",
+                        'alt': 47000,
+                        'mu': 1.7658,
+                        'radius': 60,
+                        'inclination': 6,
+                        'soi': 2247.428,
+                        'color': "#97d0a9"
+                },
+                'Duna': {
+                        'name': "Duna",
+                        'parent': "Kerbol",
+                        'alt': 20726155.264,
+                        'mu': 301.363,
+                        'radius': 320,
+                        'inclination': 1.85,
+                        'soi': 47921.949,
+                        'color': "orange"
+                }
+}
+
+alt1 = 13599840.26
+alt2 = 20726155.26
+mu = 1167922000
+soi = 84159.2865
+radius = 600
+parkingOrbit = 100
+kerbinMu = 3531.6
+
+def orgin(myTurtle):
+    myTurtle.penup()
+    myTurtle.goto(0,0)
+    myTurtle.pendown()
+
+
+def doMath(origin , destination):
+
+    alt1 = data[origin]['alt']
+    alt2 = data[destination]['alt']
+    mu = data[data[origin]['parent']]['mu']
+    soi = data[origin]['soi']
+    radius = data[origin]['radius']
+    kerbinMu = data[origin]['mu']
+
+
+    #Phase Angle
+    transferTime = math.pi * math.sqrt(math.pow(alt1 + alt2,3)/(8*mu))
+    print('Transfer Time: ' + str(transferTime/60/60/24))
+    phaseAngle = 180 - math.sqrt(mu/alt2) * (transferTime/alt2) * (180/math.pi)
+    print('Phase angle: ' + str(round(phaseAngle,2)))
+
+    #Burn required
+    exitAlt = alt1 + soi
+    velocity2 = math.sqrt(mu/exitAlt) * (math.sqrt((2*alt2)/(exitAlt+alt2))- 1)
+    r = radius + parkingOrbit
+    v = math.sqrt((r * (soi *velocity2 * velocity2 - 2 * kerbinMu ) + 2 * kerbinMu * soi) / (r * soi))
+    print('Velocity required: ' + str(round(v,6) * 1000) + 'm/s')
+
+    v_origin = math.sqrt(kerbinMu/r)
+    deltaV = v - v_origin
+
+    print('Delta V required: ' + str(round(deltaV,6) * 1000) + 'm/s')
+
+    #Ejection Angle
+    eta = v*v/2 - kerbinMu/r
+    h = r * v
+    e = math.sqrt(1+((2 * eta * h * h)/(kerbinMu * kerbinMu)))
+    eject = (180 - (math.acos(1/e) * (180/math.pi)))
+
+    print('Ecentricity: ' + str(round(e,2)));
+    print('Ejection Angle: ' + str(round(eject,6)))
+
+    myTurtle = turtle.Turtle()
+    myTurtle.speed(0)
+    myTurtle.hideturtle()
+
+    myTurtle.dot(20,"yellow")
+
+    myTurtle.penup()
+    myTurtle.goto(0,-alt1/100000)
+    myTurtle.pendown()
+    myTurtle.circle(alt1 / 100000)
+
+    myTurtle.penup()
+    myTurtle.goto(0,-alt2/100000)
+    myTurtle.pendown()
+    myTurtle.circle(alt2 / 100000)
+
+    myTurtle.penup()
+    myTurtle.goto(0,0)
+    myTurtle.pendown()
+    lineLength = 1.1 * (alt1 / 100000)
+    myTurtle.color("red")
+    myTurtle.goto(lineLength,0)
+
+    myTurtle.penup()
+    myTurtle.goto(alt2 / 100000, 0)
+    myTurtle.pendown()
+    myTurtle.dot(10,"blue")
+
+    myTurtle.hideturtle()
+
+
+
+    turtle.getscreen()._root.mainloop()
+
+doMath('Kerbin', 'Moho')
+
